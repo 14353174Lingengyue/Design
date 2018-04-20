@@ -8,8 +8,8 @@
 
 using namespace std;
 
-double c1 = 1.5;
-double c2 = 5;
+double c1 = 1.6;
+double c2 = 2;
 double c3 = 10;
 double alpha = 1;
 
@@ -20,11 +20,11 @@ void init_SCO(vector<vector<double> >& SCO, vector<vector<double> > dist1, vecto
 double get_SCO(vector<double> v1, vector<double> v2);
 
 double Gauss(double x, double c){
-	return exp(-pow(x, 2)/(2 * pow(c, 2)));
+	return exp(-x * x /(2 * c * c));
 }
 
 double distSCO(double dist, double c){
-	return exp(-abs(dist)/(2 * pow(c, 2)));
+	return exp(-abs(dist)/(2 * c * c));
 }
 
 int main(int argc, char* argv[]){
@@ -84,20 +84,24 @@ int main(int argc, char* argv[]){
 			double newSCO = SCO[i - 1][j - 1] + SCO[i][j];
 			sepX[i][j] = sepX[i - 1][j - 1];
 			sepY[i][j] = sepY[i - 1][j - 1];
-			c3 = len1 / 6.0;
-			for (int k = 1; k < c3 && i - k > 0; k++){
+			double co = len1 / 6.0;
+			co = min(10.0, c3);
+			for (int k = 1; k < co && i - k > 0; k++){
 				double tmp = SCO[i - k][j] * Gauss(k, c3);
 				if (tmp > newSCO){
 					newSCO = tmp;
-					sepY[i][j] = sepY[i - 1][j - 1] + k;
+					sepX[i][j] = sepX[i - k][j]; 
+					sepY[i][j] = sepY[i - k][j] + k;
 				}
 			} 
-			c3 = len2 / 6.0;
-			for (int k = 1; k < c3 && j - k > 0; k++){
+			co = len2 / 6.0;
+			co = min(10.0, c3);
+			for (int k = 1; k < co && j - k > 0; k++){
 				double tmp = SCO[i][j - k] * Gauss(k, c3);
 				if (tmp > newSCO){
 					newSCO = tmp;
-					sepX[i][j] = sepX[i - 1][j - 1] + k;
+					sepX[i][j] = sepX[i][j - k] + k;
+					sepY[i][j] = sepY[i][j - k];
 				}
 			}
 			SCO[i][j] = newSCO;
@@ -195,14 +199,16 @@ double get_SCO(vector<double> v1, vector<double> v2){
 				double tmp = M[i - k][j] * Gauss(k, c2);
 				if (SCO < tmp){
 					SCO = tmp;
-					sepY[i][j] = sepY[i - 1][j - 1] + k;
+					sepX[i][j] = sepX[i - k][j];
+					sepY[i][j] = sepY[i - k][j] + k;
 				}
 			}
 			for (int k = 1; k < 5 && j - k > 0; k++){
 				double tmp = M[i][j - k] * Gauss(k, c2);
 				if (SCO < tmp){
 					SCO = tmp;
-					sepX[i][j] = sepX[i - 1][j - 1] + k;
+					sepX[i][j] = sepX[i][j - k] + k;
+					sepY[i][j] = sepY[i][j - k];
 				}
 			}
 			M[i][j] = SCO;
